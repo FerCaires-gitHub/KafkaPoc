@@ -2,6 +2,7 @@
 using KafkaDomain.Domain;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 
@@ -11,8 +12,9 @@ namespace KafkaConsumer
     {
         static void Main(string[] args)
         {
-            var consumer = new UserConsumerService();
-            consumer.Consume();
+            //var consumer = new UserConsumerService();
+            //consumer.Consume();
+            Consume();
         }
 
         private static void Consume()
@@ -30,12 +32,13 @@ namespace KafkaConsumer
             };
 
             var counter = 0;
-            using (var c = new ConsumerBuilder<Null, User>(conf)
-                .SetValueDeserializer(new CustomDeserializer<User>())
+            using (var c = new ConsumerBuilder<Null, string>(conf)
                 .SetErrorHandler((_, e) => Console.WriteLine($"Error: {e.Reason}"))
                 .Build())
             {
-                c.Subscribe("ynm8ml8b-HelloWorld");
+                var topics = new List<string>() { "ynm8ml8b-TesteKafka_2", "ynm8ml8b-TesteKafka" };
+
+                c.Subscribe(topics);
 
                 CancellationTokenSource cts = new CancellationTokenSource();
                 Console.CancelKeyPress += (_, e) =>
@@ -48,7 +51,7 @@ namespace KafkaConsumer
                 {
                     while (true)
                     {
-                        var cr = new ConsumeResult<Null, User>();
+                        var cr = new ConsumeResult<Null, string>();
                         try
                         {
                             cr = c.Consume(cts.Token);
@@ -56,17 +59,9 @@ namespace KafkaConsumer
                             Console.WriteLine($"Counter:{counter}");
                             if (cr.Message != null)
                             {
-                                for (int i = 0; i < cr.Message.Headers.Count; i++)
-                                {
-                                    var key = cr.Message.Headers[i].Key;
-                                    var value = Encoding.UTF8.GetString(cr.Message.Headers[i].GetValueBytes());
-                                    Console.WriteLine($"Chave:{key} || Valor:{value}");
-                                }
-
-                                Console.WriteLine($"Consumed message id '{JsonConvert.SerializeObject(cr.Message.Value)}' at: '{cr.TopicPartitionOffset}'.");
+                                var obj = Conversor.Mapper(cr.Message.Headers, cr.Message.Value);
+                                Console.WriteLine($"Consumed message id '{JsonConvert.SerializeObject(obj)}' at: '{cr.TopicPartitionOffset}'.");
                             }
-                            else
-                                cr.Message = new Message<Null, User>();
                         }
                         catch (ConsumeException e)
                         {

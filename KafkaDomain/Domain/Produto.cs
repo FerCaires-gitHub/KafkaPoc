@@ -5,10 +5,10 @@ using System.Text;
 
 namespace KafkaDomain.Domain
 {
-    public class User : IModelBase
+    public class Produto : IModelBase
     {
         public int Id { get; set; }
         public string Nome { get; set; }
-        public string Email { get; set; }
+        public decimal Valor { get; set; }
     }
 }
