@@ -1,5 +1,6 @@
 ﻿using Confluent.Kafka;
 using KafkaDomain.Domain;
+using KafkaDomain.Interface;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -10,13 +11,13 @@ namespace KafkaConsumer
 {
     class Program
     {
+        private static IDictionary<string, CustomDeserializer<IModelBase>> dict = new Dictionary<string, CustomDeserializer<IModelBase>>();
         static void Main(string[] args)
         {
             //var consumer = new UserConsumerService();
             //consumer.Consume();
             Consume();
         }
-
         private static void Consume()
         {
             var conf = new ConsumerConfig
@@ -27,7 +28,7 @@ namespace KafkaConsumer
                 SaslPassword = "Dcd35T6SmpSyh_FfC2r-rrLQUUWAcUl0",
                 SecurityProtocol = SecurityProtocol.SaslSsl,
                 SaslMechanism = SaslMechanism.ScramSha256,
-                AutoOffsetReset = AutoOffsetReset.Latest,
+                AutoOffsetReset = AutoOffsetReset.Earliest,
                 EnableAutoCommit = true
             };
 
@@ -36,7 +37,7 @@ namespace KafkaConsumer
                 .SetErrorHandler((_, e) => Console.WriteLine($"Error: {e.Reason}"))
                 .Build())
             {
-                var topics = new List<string>() { "ynm8ml8b-TesteKafka_2", "ynm8ml8b-TesteKafka" };
+                var topics = new List<string>() { "ynm8ml8b-BetFairData" };
 
                 c.Subscribe(topics);
 
@@ -59,8 +60,12 @@ namespace KafkaConsumer
                             Console.WriteLine($"Counter:{counter}");
                             if (cr.Message != null)
                             {
-                                var obj = Conversor.Mapper(cr.Message.Headers, cr.Message.Value);
-                                Console.WriteLine($"Consumed message id '{JsonConvert.SerializeObject(obj)}' at: '{cr.TopicPartitionOffset}'.");
+                                Console.WriteLine(cr.Topic);
+                                Console.WriteLine(JsonConvert.SerializeObject(cr.Message.Value));
+                                //var deserializer = Conversor.GetDeserializer(cr.Topic);
+                                //var result = deserializer.Deserialize(Encoding.UTF8.GetBytes(cr.Message.Value),false,new SerializationContext());
+                                //var obj = Conversor.Mapper(cr.Message.Headers, cr.Message.Value);
+                                //Console.WriteLine($"Consumed message id '{JsonConvert.SerializeObject(obj)}' at: '{cr.TopicPartitionOffset}'.");
                             }
                         }
                         catch (ConsumeException e)

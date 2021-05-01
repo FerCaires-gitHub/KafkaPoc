@@ -14,8 +14,10 @@ namespace KafkaProducer
         public void SendMessage()
         {
             var random = new Random();
-            var config = new ProducerConfig { BootstrapServers = "omnibus-01.srvs.cloudkafka.com:9094,omnibus-02.srvs.cloudkafka.com:9094,omnibus-03.srvs.cloudkafka.com:9094"
-                , SaslUsername = "ynm8ml8b", SaslPassword = "Dcd35T6SmpSyh_FfC2r-rrLQUUWAcUl0" 
+            var config = new ProducerConfig { 
+                BootstrapServers = "omnibus-01.srvs.cloudkafka.com:9094,omnibus-02.srvs.cloudkafka.com:9094,omnibus-03.srvs.cloudkafka.com:9094"
+                ,SaslUsername = "ynm8ml8b", 
+                SaslPassword = "Dcd35T6SmpSyh_FfC2r-rrLQUUWAcUl0" 
                 ,SecurityProtocol = SecurityProtocol.SaslSsl,
                 SaslMechanism = SaslMechanism.ScramSha256
             };

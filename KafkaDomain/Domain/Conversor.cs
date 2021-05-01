@@ -16,6 +16,26 @@ namespace KafkaDomain.Domain
             { "PRODUTO", Tipos.Produto}
         };
 
+        private static IDictionary<string, dynamic> conversorMapper = new Dictionary<string, dynamic>()
+        { 
+            {"ynm8ml8b-TesteKafka_2", new CustomDeserializer<User>() },
+            {"ynm8ml8b-TesteKafka", new CustomDeserializer<Produto>()}
+        };
+
+
+        public static IDeserializer<IModelBase> GetDeserializer(string topicName)
+        {
+            IDeserializer<IModelBase> conversor = null;
+            var retorno = typeof(IDeserializer<>);
+            var constructed = retorno.MakeGenericType(typeof(IModelBase));
+            var result = Activator.CreateInstance(constructed);
+            if (conversorMapper.ContainsKey(topicName))
+            {
+                conversor = conversorMapper[topicName];
+            }
+            return conversor;
+        }
+
         private const string TIPO = "TYPE";
 
         public static IModelBase Mapper(Headers headers, string message)
